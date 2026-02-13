@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>iCare EIDON vs Optos Comparisons</title>
+<style>body{font-family:Arial,sans-serif;margin:0;background:#0f172a;color:#e2e8f0}.wrap{max-width:1100px;margin:0 auto;padding:24px}h1{font-size:28px}.case{background:#111827;border:1px solid #334155;border-radius:12px;padding:16px;margin:16px 0}.imgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}.imgs img{width:100%;border-radius:8px;border:1px solid #475569;background:#000}.small{color:#94a3b8;font-size:13px}.lock{position:fixed;inset:0;background:#020617;display:flex;align-items:center;justify-content:center;z-index:50}.card{background:#111827;padding:20px;border-radius:12px;border:1px solid #334155;width:min(420px,92vw)}input,button{width:100%;padding:10px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#e2e8f0}button{margin-top:10px;cursor:pointer}</style>
+</head><body>
+<div id='lock' class='lock'><div class='card'><h3>Protected Access</h3><p class='small'>Enter rep password</p><input id='pw' type='password' placeholder='Password'><button onclick='unlock()'>Open</button><p id='err' class='small' style='color:#fca5a5'></p></div></div>
+<div class='wrap'><h1>iCare EIDON vs Optos</h1><p class='small'>Sales reference gallery for office/tradeshow demos.</p><div id='app'></div></div>
+<script>
+const PASSWORD_HASH='0a9368ab98852c30f11e26a6e92d18cb0fa07136b0e3537870dcb909cd1e85f4'; // BlueRiver2026!
+async function sha256(t){const b=new TextEncoder().encode(t);const h=await crypto.subtle.digest('SHA-256',b);return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function unlock(){const v=document.getElementById('pw').value;const h=await sha256(v);if(h===PASSWORD_HASH){sessionStorage.setItem('ok','1');document.getElementById('lock').style.display='none'}else document.getElementById('err').textContent='Wrong password'}
+if(sessionStorage.getItem('ok')==='1') document.getElementById('lock').style.display='none';
+fetch('cases.json').then(r=>r.json()).then(data=>{const app=document.getElementById('app');data.cases.forEach(c=>{const d=document.createElement('div');d.className='case';d.innerHTML=`<h2>${c.title}</h2><p class='small'>${c.summary||''}</p><div class='imgs'>${c.images.map(i=>`<img loading="lazy" src="${i}"/>`).join('')}</div>`;app.appendChild(d);});});
+</script></body></html>
