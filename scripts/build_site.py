@@ -31,6 +31,8 @@ for fn in sorted(os.listdir(SRC)):
     if not fn.lower().endswith('.docx'): continue
     path=os.path.join(SRC,fn)
     title=re.sub(r'\.docx$','',fn,flags=re.I)
+    if title.strip().lower()=="add comments for each image":
+        continue
     s=slug(title)
     with zipfile.ZipFile(path) as z:
         media=[n for n in z.namelist() if n.startswith('word/media/')]
@@ -44,6 +46,10 @@ for fn in sorted(os.listdir(SRC)):
             out_path=os.path.join(ASSETS,out_name)
             with z.open(m) as r, open(out_path,'wb') as w:
                 shutil.copyfileobj(r,w)
+            if os.path.getsize(out_path) < 10000:
+                # tiny logo/footer images are not useful in demos
+                os.remove(out_path)
+                continue
             imgs.append('assets/'+out_name)
     cases.append({'title':title,'slug':s,'summary':summary,'images':imgs,'source_doc':'source_docs/'+fn})
 

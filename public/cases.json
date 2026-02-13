@@ -1,30 +1,12 @@
 {
   "cases": [
     {
-      "title": "ADD COMMENTS FOR EACH IMAGE",
-      "slug": "add-comments-for-each-image",
-      "summary": "ADD COMMENTS FOR EACH IMAGE | Eidon UWL                           Images courtesy of Mile Brujic OD, FAAO",
-      "images": [
-        "assets/add-comments-for-each-image-1.png",
-        "assets/add-comments-for-each-image-2.svg",
-        "assets/add-comments-for-each-image-3.png",
-        "assets/add-comments-for-each-image-4.svg",
-        "assets/add-comments-for-each-image-5.png",
-        "assets/add-comments-for-each-image-6.svg",
-        "assets/add-comments-for-each-image-7.png",
-        "assets/add-comments-for-each-image-8.svg",
-        "assets/add-comments-for-each-image-9.jpeg"
-      ],
-      "source_doc": "source_docs/ADD COMMENTS FOR EACH IMAGE.docx"
-    },
-    {
       "title": "ARE YOU MISSING ANYTHING",
       "slug": "are-you-missing-anything",
       "summary": "ARE YOU MISSING ANYTHING? | Eidon UWF                                                                               Images Courtesy of Julie Rodman OD, FAAO | Optos vs Eidon Side by Side | Eidon UWF                                                                               Images Courtesy of Julie Rodman OD, FAAO",
       "images": [
         "assets/are-you-missing-anything-1.png",
         "assets/are-you-missing-anything-2.png",
-        "assets/are-you-missing-anything-3.jpeg",
         "assets/are-you-missing-anything-4.png",
         "assets/are-you-missing-anything-5.png",
         "assets/are-you-missing-anything-6.png"
@@ -37,8 +19,7 @@
       "summary": "Bilateral Diabetic Retinopathy on the DRS Plus | Eidon UWF                                                                               Images Courtesy of Julie Rodman OD, FAAO",
       "images": [
         "assets/bilateral-diabetic-retinopathy-1.png",
-        "assets/bilateral-diabetic-retinopathy-2.png",
-        "assets/bilateral-diabetic-retinopathy-3.jpeg"
+        "assets/bilateral-diabetic-retinopathy-2.png"
       ],
       "source_doc": "source_docs/Bilateral Diabetic Retinopathy.docx"
     },
@@ -50,8 +31,7 @@
         "assets/brujic-erm-with-oct-1.png",
         "assets/brujic-erm-with-oct-2.svg",
         "assets/brujic-erm-with-oct-3.png",
-        "assets/brujic-erm-with-oct-4.svg",
-        "assets/brujic-erm-with-oct-5.jpeg"
+        "assets/brujic-erm-with-oct-4.svg"
       ],
       "source_doc": "source_docs/Brujic ERM with OCT.docx"
     },
@@ -63,8 +43,7 @@
         "assets/brujic-tremor-and-erm-1.png",
         "assets/brujic-tremor-and-erm-2.svg",
         "assets/brujic-tremor-and-erm-3.png",
-        "assets/brujic-tremor-and-erm-4.svg",
-        "assets/brujic-tremor-and-erm-5.jpeg"
+        "assets/brujic-tremor-and-erm-4.svg"
       ],
       "source_doc": "source_docs/Brujic Tremor and ERM.docx"
     },
@@ -74,8 +53,7 @@
       "summary": "Bulls Eye Maculopathy Highlighted With FAF | Eidon AF UWF                                                                         Images Courtesy of Julie Rodman OD, FAAO",
       "images": [
         "assets/bulls-eye-maculopathy-highlighted-with-faf-1.jpeg",
-        "assets/bulls-eye-maculopathy-highlighted-with-faf-2.jpeg",
-        "assets/bulls-eye-maculopathy-highlighted-with-faf-3.jpeg"
+        "assets/bulls-eye-maculopathy-highlighted-with-faf-2.jpeg"
       ],
       "source_doc": "source_docs/Bulls Eye Maculopathy Highlighted With FAF.docx"
     }
