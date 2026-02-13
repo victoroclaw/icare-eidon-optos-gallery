@@ -1,7 +1,7 @@
 import os, re, json, zipfile, shutil, hashlib
 from xml.etree import ElementTree as ET
 
-ROOT='/Users/victor/.openclaw/workspace/icare-site'
+ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC=os.path.join(ROOT,'source_docs')
 PUB=os.path.join(ROOT,'public')
 ASSETS=os.path.join(PUB,'assets')
