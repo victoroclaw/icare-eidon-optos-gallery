@@ -5,7 +5,7 @@
 <div id='lock' class='lock'><div class='card'><h3>Protected Access</h3><p class='small'>Enter rep password</p><input id='pw' type='password' placeholder='Password'><button onclick='unlock()'>Open</button><p id='err' class='small' style='color:#fca5a5'></p></div></div>
 <div class='wrap'><h1>iCare EIDON vs Optos</h1><p class='small'>Sales reference gallery for office/tradeshow demos.</p><div id='app'></div></div>
 <script>
-const PASSWORD_HASH='0a9368ab98852c30f11e26a6e92d18cb0fa07136b0e3537870dcb909cd1e85f4'; // BlueRiver2026!
+const PASSWORD_HASH='d5b5856fc9bdb87f256c9d86f506179b3bdb391bf7ab4cdd1d1131c3d87b106e'; // Optossux
 async function sha256(t){const b=new TextEncoder().encode(t);const h=await crypto.subtle.digest('SHA-256',b);return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function unlock(){const v=document.getElementById('pw').value;const h=await sha256(v);if(h===PASSWORD_HASH){sessionStorage.setItem('ok','1');document.getElementById('lock').style.display='none'}else document.getElementById('err').textContent='Wrong password'}
 if(sessionStorage.getItem('ok')==='1') document.getElementById('lock').style.display='none';

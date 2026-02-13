@@ -8,7 +8,7 @@ Static, password-gated webpage for field reps and tradeshows.
 - Simple password gate (client-side)
 
 ## Current password
-`BlueRiver2026!`
+`Optossux`
 
 > Note: This is lightweight client-side protection (good for casual gating, not high-security PHI use).
 
