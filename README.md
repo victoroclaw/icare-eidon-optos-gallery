@@ -32,3 +32,10 @@ python3 scripts/build_site.py
 
 ## Deploy (GitHub Pages)
 This repo includes a Pages workflow that publishes from `public/`.
+
+## Deploy (Netlify, preferred neutral URL)
+This repo includes `netlify.toml` so Netlify can deploy directly from GitHub.
+- Publish dir: `public`
+- Build command: `python3 scripts/build_site.py`
+
+Suggested Netlify site name: `eidonimages` (URL: `https://eidonimages.netlify.app` if available)
