@@ -1,39 +1,559 @@
-<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>EIDON images</title>
-<style>body{font-family:Arial,sans-serif;margin:0;background:#0f172a;color:#e2e8f0}.wrap{max-width:1100px;margin:0 auto;padding:24px}h1{font-size:28px}.case{background:#111827;border:1px solid #334155;border-radius:12px;padding:16px;margin:16px 0}.imgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}.imgs img{width:100%;border-radius:8px;border:1px solid #475569;background:#000;cursor:zoom-in}.small{color:#94a3b8;font-size:13px}.lock{position:fixed;inset:0;background:#020617;display:flex;align-items:center;justify-content:center;z-index:50}.card{background:#111827;padding:20px;border-radius:12px;border:1px solid #334155;width:min(420px,92vw)}input,button{width:100%;padding:10px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#e2e8f0}button{margin-top:10px;cursor:pointer}.modal{position:fixed;inset:0;background:rgba(2,6,23,.92);display:none;align-items:center;justify-content:center;z-index:60}.modal.open{display:flex}.viewer{position:relative;max-width:96vw;max-height:96vh;overflow:hidden}.viewer img{max-width:96vw;max-height:90vh;transform-origin:center center;transition:transform .08s linear}.tools{position:absolute;top:10px;right:10px;display:flex;gap:8px}.tools button{width:auto;padding:8px 10px}</style>
-</head><body>
-<div id='lock' class='lock'><div class='card'><h3>Protected Access</h3><p class='small'>Enter rep password</p><input id='pw' type='password' placeholder='Password'><button onclick='unlock()'>Open</button><p id='err' class='small' style='color:#fca5a5'></p></div></div>
-<div class='wrap'><h1>EIDON images</h1><p class='small'>Sales reference gallery for office/tradeshow demos.</p><div id='app'></div></div>
-<div id='modal' class='modal' onclick='if(event.target.id==="modal") closeModal()'>
-  <div class='viewer'>
-    <div class='tools'>
-      <button onclick='zoomBy(0.2)'>+</button>
-      <button onclick='zoomBy(-0.2)'>-</button>
-      <button onclick='resetZoom()'>Reset</button>
-      <button onclick='closeModal()'>Close</button>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>iCare Clinical Atlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070b14;
+      --bg-soft: #0f1628;
+      --ink: #eaf1ff;
+      --muted: #90a1c2;
+      --line: rgba(165, 183, 220, 0.22);
+      --accent: #9be7ff;
+      --accent-2: #86ffc8;
+      --danger: #ff9aa5;
+      --shadow: 0 28px 70px rgba(0, 0, 0, 0.45);
+      --radius-lg: 22px;
+      --radius-md: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+
+    body {
+      font-family: "Manrope", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 7% -8%, rgba(155, 231, 255, 0.16), transparent 60%),
+        radial-gradient(900px 400px at 93% 6%, rgba(134, 255, 200, 0.12), transparent 65%),
+        linear-gradient(145deg, #05070c 0%, #0c1425 52%, #0b1020 100%);
+      overflow: hidden;
+    }
+
+    .grain::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 3px 3px;
+      opacity: .06;
+      z-index: 0;
+    }
+
+    .layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(250px, 300px) 1fr;
+      height: 100svh;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(18, 29, 52, .82), rgba(10, 16, 32, .82));
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .sidebar {
+      padding: 18px 14px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .kicker {
+      color: var(--accent);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(34px, 4vw, 46px);
+      line-height: .92;
+      font-weight: 600;
+    }
+
+    .subtitle { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top: 6px; }
+
+    .search {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(7, 11, 20, .85);
+      color: var(--ink);
+      padding: 11px 12px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(155, 231, 255, .13); }
+
+    .case-list {
+      overflow: auto;
+      min-height: 0;
+      padding-right: 4px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .case-btn {
+      text-align: left;
+      width: 100%;
+      border: 1px solid transparent;
+      background: rgba(11, 18, 34, .72);
+      color: #dbe7ff;
+      border-radius: 12px;
+      padding: 10px 11px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: .18s ease;
+    }
+
+    .case-btn:hover { transform: translateX(3px); border-color: rgba(155, 231, 255, .35); }
+    .case-btn.active {
+      background: linear-gradient(120deg, rgba(155, 231, 255, .18), rgba(134, 255, 200, .13));
+      border-color: rgba(155, 231, 255, .5);
+    }
+
+    .legend { color: var(--muted); font-size: 12px; }
+
+    .content {
+      min-height: 0;
+      overflow: auto;
+      padding: 20px;
+    }
+
+    .hero {
+      padding: 16px 16px 20px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+
+    .hero h2 {
+      margin: 0;
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(30px, 3.5vw, 44px);
+      font-weight: 600;
+      line-height: .96;
+    }
+
+    .hero p { margin: 8px 0 0; color: var(--muted); max-width: 70ch; line-height: 1.5; font-size: 14px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      padding: 6px;
+    }
+
+    .tile {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #0a1120;
+      overflow: hidden;
+      position: relative;
+      cursor: zoom-in;
+      transition: transform .18s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .tile:hover {
+      transform: translateY(-2px);
+      border-color: rgba(155, 231, 255, .48);
+      box-shadow: 0 20px 45px rgba(0,0,0,.42);
+    }
+
+    .tile img { width: 100%; display: block; aspect-ratio: 4/3; object-fit: cover; background: #020408; }
+
+    .tile::after {
+      content: "Tap to inspect";
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      font-size: 11px;
+      letter-spacing: .03em;
+      padding: 4px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(2,6,12,.64);
+      color: #d8e6ff;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: .15s ease;
+    }
+
+    .tile:hover::after { opacity: 1; transform: translateY(0); }
+
+    .empty {
+      margin: 36px auto;
+      width: min(600px, 100%);
+      text-align: center;
+      padding: 24px;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius-md);
+      color: var(--muted);
+    }
+
+    .lock {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(900px 500px at 50% -20%, rgba(155,231,255,.12), transparent 70%), rgba(5, 8, 16, .95);
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .lock-card {
+      width: min(430px, 96vw);
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(15, 24, 42, .96), rgba(8, 13, 24, .96));
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .lock-card h3 { margin: 0; font-family: "Cormorant Garamond", serif; font-size: 31px; font-weight: 600; }
+    .lock-card p { margin: 8px 0 14px; color: var(--muted); font-size: 14px; }
+
+    .input, .btn {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      padding: 11px 12px;
+      font-size: 14px;
+    }
+
+    .input { background: rgba(2, 8, 18, .82); color: var(--ink); }
+    .btn {
+      margin-top: 10px;
+      cursor: pointer;
+      background: linear-gradient(120deg, rgba(155,231,255,.2), rgba(134,255,200,.14));
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    #err { color: var(--danger); min-height: 18px; font-size: 12px; margin-top: 8px; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(2, 5, 10, .92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .modal.open { display: flex; }
+
+    .viewer {
+      position: relative;
+      max-width: 96vw;
+      max-height: 96vh;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #000;
+    }
+
+    .viewer img {
+      max-width: 96vw;
+      max-height: 92vh;
+      display: block;
+      transform-origin: center center;
+      transition: transform .08s linear;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .tools {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 8px;
+      z-index: 1;
+    }
+
+    .tools button {
+      border: 1px solid rgba(255,255,255,.24);
+      background: rgba(7,12,24,.74);
+      color: white;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    @media (max-width: 920px) {
+      body { overflow: auto; }
+      .layout { grid-template-columns: 1fr; height: auto; min-height: 100svh; }
+      .sidebar { grid-template-rows: auto auto auto; }
+      .case-list { max-height: 240px; }
+      .content { max-height: none; }
+    }
+  </style>
+</head>
+<body class="grain">
+  <div id="lock" class="lock">
+    <div class="lock-card">
+      <h3>Clinical Atlas Access</h3>
+      <p>Enter rep password to view iCare EIDON comparison cases.</p>
+      <input id="pw" class="input" type="password" placeholder="Password" />
+      <button class="btn" onclick="unlock()">Open atlas</button>
+      <div id="err"></div>
     </div>
-    <img id='modalImg' src='' alt='zoom view'>
   </div>
-</div>
-<script>
-const PASSWORD_HASH='d5b5856fc9bdb87f256c9d86f506179b3bdb391bf7ab4cdd1d1131c3d87b106e'; // Optossux
-async function sha256(t){const b=new TextEncoder().encode(t);const h=await crypto.subtle.digest('SHA-256',b);return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function unlock(){const v=document.getElementById('pw').value;const h=await sha256(v);if(h===PASSWORD_HASH){sessionStorage.setItem('ok','1');document.getElementById('lock').style.display='none'}else document.getElementById('err').textContent='Wrong password'}
-if(sessionStorage.getItem('ok')==='1') document.getElementById('lock').style.display='none';
-let zoom=1;
-let panX=0, panY=0, dragging=false, startX=0, startY=0;
-const modalImg=document.getElementById('modalImg');
-function applyTransform(){modalImg.style.transform=`translate(${panX}px, ${panY}px) scale(${zoom})`;}
-function setOriginFromEvent(e){const r=modalImg.getBoundingClientRect();const ox=((e.clientX-r.left)/r.width)*100;const oy=((e.clientY-r.top)/r.height)*100;modalImg.style.transformOrigin=`${Math.max(0,Math.min(100,ox))}% ${Math.max(0,Math.min(100,oy))}%`;}
-function openModal(src){zoom=1;panX=0;panY=0;const m=document.getElementById('modal');modalImg.style.transformOrigin='center center';modalImg.src=src;applyTransform();m.classList.add('open');}
-function closeModal(){document.getElementById('modal').classList.remove('open');}
-function zoomBy(n){zoom=Math.max(1,Math.min(8,zoom+n));applyTransform();}
-function resetZoom(){zoom=1;panX=0;panY=0;modalImg.style.transformOrigin='center center';applyTransform();}
-document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal();});
-modalImg.addEventListener('wheel',e=>{e.preventDefault();setOriginFromEvent(e);zoomBy(e.deltaY<0?0.2:-0.2);},{passive:false});
-modalImg.addEventListener('mousedown',e=>{dragging=true;startX=e.clientX-panX;startY=e.clientY-panY;modalImg.style.cursor='grabbing';});
-window.addEventListener('mouseup',()=>{dragging=false;modalImg.style.cursor='zoom-in';});
-window.addEventListener('mousemove',e=>{if(!dragging||zoom<=1)return;panX=e.clientX-startX;panY=e.clientY-startY;applyTransform();});
-modalImg.addEventListener('dblclick',e=>{setOriginFromEvent(e);zoomBy(0.8);});
-fetch('cases.json').then(r=>r.json()).then(data=>{const app=document.getElementById('app');data.cases.forEach(c=>{const d=document.createElement('div');d.className='case';d.innerHTML=`<h2>${c.title}</h2><p class='small'>${c.summary||''}</p><div class='imgs'>${c.images.map(i=>`<img loading="lazy" src="${i}" onclick="openModal('${i}')"/>`).join('')}</div>`;app.appendChild(d);});});
-</script></body></html>
+
+  <main class="layout">
+    <aside class="panel sidebar">
+      <header>
+        <div class="kicker">iCare field reference</div>
+        <h1>Clinical Atlas</h1>
+        <div class="subtitle">Fast in-person reference for tradeshows and office demos.</div>
+      </header>
+
+      <div>
+        <input id="search" class="search" placeholder="Search cases…" />
+      </div>
+
+      <div id="caseList" class="case-list"></div>
+
+      <footer class="legend">
+        Click an image to inspect • Scroll wheel to zoom • Drag to pan
+      </footer>
+    </aside>
+
+    <section class="panel content">
+      <div class="hero">
+        <h2 id="caseTitle">Loading cases…</h2>
+        <p id="caseSummary"></p>
+      </div>
+      <div id="grid" class="grid"></div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal" onclick="if(event.target.id==='modal') closeModal()">
+    <div class="viewer">
+      <div class="tools">
+        <button onclick="zoomBy(0.2)">+</button>
+        <button onclick="zoomBy(-0.2)">−</button>
+        <button onclick="resetZoom()">Reset</button>
+        <button onclick="closeModal()">Close</button>
+      </div>
+      <img id="modalImg" src="" alt="Inspection view" />
+    </div>
+  </div>
+
+  <script>
+    const PASSWORD_HASH = 'd5b5856fc9bdb87f256c9d86f506179b3bdb391bf7ab4cdd1d1131c3d87b106e'; // Optossux
+    const state = { cases: [], filtered: [], activeIndex: 0 };
+
+    async function sha256(text) {
+      const bytes = new TextEncoder().encode(text);
+      const hash = await crypto.subtle.digest('SHA-256', bytes);
+      return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function unlock() {
+      const value = document.getElementById('pw').value;
+      const hash = await sha256(value);
+      if (hash === PASSWORD_HASH) {
+        sessionStorage.setItem('icare_ok', '1');
+        document.getElementById('lock').style.display = 'none';
+        document.getElementById('search').focus();
+      } else {
+        document.getElementById('err').textContent = 'Wrong password';
+      }
+    }
+
+    if (sessionStorage.getItem('icare_ok') === '1') {
+      document.getElementById('lock').style.display = 'none';
+    }
+
+    function renderCaseList() {
+      const wrap = document.getElementById('caseList');
+      wrap.innerHTML = '';
+
+      if (!state.filtered.length) {
+        wrap.innerHTML = '<div class="legend">No matching cases.</div>';
+        renderActiveCase();
+        return;
+      }
+
+      state.filtered.forEach((c, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'case-btn' + (idx === state.activeIndex ? ' active' : '');
+        btn.textContent = c.title;
+        btn.onclick = () => {
+          state.activeIndex = idx;
+          renderCaseList();
+          renderActiveCase();
+        };
+        wrap.appendChild(btn);
+      });
+    }
+
+    function renderActiveCase() {
+      const title = document.getElementById('caseTitle');
+      const summary = document.getElementById('caseSummary');
+      const grid = document.getElementById('grid');
+
+      if (!state.filtered.length) {
+        title.textContent = 'No results';
+        summary.textContent = 'Try another search phrase.';
+        grid.innerHTML = '<div class="empty">No cases matched your search.</div>';
+        return;
+      }
+
+      const selected = state.filtered[state.activeIndex] || state.filtered[0];
+      title.textContent = selected.title;
+      summary.textContent = selected.summary || 'Comparison images for in-field demonstration.';
+
+      grid.innerHTML = '';
+      (selected.images || []).forEach((src) => {
+        const tile = document.createElement('button');
+        tile.className = 'tile';
+        tile.type = 'button';
+        tile.innerHTML = `<img loading="lazy" src="${src}" alt="${selected.title}" />`;
+        tile.onclick = () => openModal(src);
+        grid.appendChild(tile);
+      });
+
+      if (!selected.images || !selected.images.length) {
+        grid.innerHTML = '<div class="empty">This case currently has no extracted images.</div>';
+      }
+    }
+
+    function applySearch(term) {
+      const q = term.trim().toLowerCase();
+      state.filtered = q
+        ? state.cases.filter(c => (c.title + ' ' + (c.summary || '')).toLowerCase().includes(q))
+        : [...state.cases];
+      state.activeIndex = 0;
+      renderCaseList();
+      renderActiveCase();
+    }
+
+    document.getElementById('search').addEventListener('input', (e) => applySearch(e.target.value));
+
+    // Modal image viewer
+    let zoom = 1;
+    let panX = 0;
+    let panY = 0;
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modalImg');
+
+    function applyTransform() {
+      modalImg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+    }
+
+    function setOriginFromEvent(e) {
+      const r = modalImg.getBoundingClientRect();
+      const ox = ((e.clientX - r.left) / r.width) * 100;
+      const oy = ((e.clientY - r.top) / r.height) * 100;
+      modalImg.style.transformOrigin = `${Math.max(0, Math.min(100, ox))}% ${Math.max(0, Math.min(100, oy))}%`;
+    }
+
+    function openModal(src) {
+      zoom = 1; panX = 0; panY = 0;
+      modalImg.src = src;
+      modalImg.style.transformOrigin = 'center center';
+      applyTransform();
+      modal.classList.add('open');
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+    }
+
+    function zoomBy(delta) {
+      zoom = Math.max(1, Math.min(8, zoom + delta));
+      applyTransform();
+    }
+
+    function resetZoom() {
+      zoom = 1; panX = 0; panY = 0;
+      modalImg.style.transformOrigin = 'center center';
+      applyTransform();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+      if (!state.filtered.length) return;
+      if (e.key === 'ArrowDown') {
+        state.activeIndex = Math.min(state.filtered.length - 1, state.activeIndex + 1);
+        renderCaseList(); renderActiveCase();
+      }
+      if (e.key === 'ArrowUp') {
+        state.activeIndex = Math.max(0, state.activeIndex - 1);
+        renderCaseList(); renderActiveCase();
+      }
+    });
+
+    modalImg.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      setOriginFromEvent(e);
+      zoomBy(e.deltaY < 0 ? 0.2 : -0.2);
+    }, { passive: false });
+
+    modalImg.addEventListener('mousedown', (e) => {
+      dragging = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+      modalImg.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mouseup', () => {
+      dragging = false;
+      modalImg.style.cursor = 'grab';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging || zoom <= 1) return;
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      applyTransform();
+    });
+
+    modalImg.addEventListener('dblclick', (e) => {
+      setOriginFromEvent(e);
+      zoomBy(0.8);
+    });
+
+    fetch('cases.json')
+      .then(r => r.json())
+      .then(data => {
+        state.cases = data.cases || [];
+        state.filtered = [...state.cases];
+        renderCaseList();
+        renderActiveCase();
+      })
+      .catch(() => {
+        document.getElementById('caseTitle').textContent = 'Unable to load cases';
+        document.getElementById('caseSummary').textContent = 'Check cases.json and try again.';
+      });
+  </script>
+</body>
+</html>
